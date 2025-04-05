@@ -32,6 +32,7 @@ export function FraudDetectionPanel() {
   const { data: patternData, isLoading: isLoadingPatterns, error: patternsError } = useFraudPatterns()
   const { data: trendData, isLoading: isLoadingTrends, error: trendsError } = useFraudTrends()
 
+  // Filter alerts based on search term and risk filter
   const filteredAlerts = fraudAlerts?.filter((alert) => {
     const matchesSearch =
       alert.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -118,14 +119,14 @@ export function FraudDetectionPanel() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {(alerts ?? []).length === 0 ? (
+                  {alerts.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center py-4 text-muted-foreground">
                         No fraud alerts found matching your filters
                       </TableCell>
                     </TableRow>
                   ) : (
-                    (alerts ?? []).map((alert) => (
+                    alerts.map((alert) => (
                       <TableRow key={alert.id}>
                         <TableCell className="font-medium">{alert.id}</TableCell>
                         <TableCell>{alert.description}</TableCell>

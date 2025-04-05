@@ -11,11 +11,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useAuth } from "@/components/auth/auth-provider"
 import { LogOut, Settings, User } from "lucide-react"
+import { useAuthState } from "@/hooks/use-auth-state"
 
 export function UserNav() {
-  const { user, logout } = useAuth()
+  const { user, logout } = useAuthState()
 
   if (!user) return null
 

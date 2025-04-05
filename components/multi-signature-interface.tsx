@@ -11,8 +11,8 @@ import {
   ChevronRight,
   Clock,
   Filter,
+  Globe,
   Search,
-  Shield,
   ThumbsDown,
   ThumbsUp,
   User,
@@ -38,6 +38,7 @@ export function MultiSignatureInterface() {
   const { data: approvalRequests, isLoading, error, refetch } = useApprovalRequests()
   const { toast } = useToast()
 
+  // Filter approvals based on search term, filters, and active tab
   const filteredApprovals = approvalRequests?.filter((approval) => {
     const matchesSearch =
       approval.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -104,7 +105,7 @@ export function MultiSignatureInterface() {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-      <Card className="lg:col-span-5">
+      <Card className="lg:col-span-5 md:col-span-2 col-span-1">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Approval Dashboard</CardTitle>
@@ -129,14 +130,14 @@ export function MultiSignatureInterface() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="pending" className="space-y-4" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
+            <TabsList className="flex flex-wrap">
               <TabsTrigger value="pending">Pending</TabsTrigger>
               <TabsTrigger value="approved">Approved</TabsTrigger>
               <TabsTrigger value="rejected">Rejected</TabsTrigger>
               <TabsTrigger value="all">All Transactions</TabsTrigger>
             </TabsList>
 
-            <div className="flex items-center gap-4 mb-4">
+            <div className="flex flex-wrap items-center gap-4 mb-4">
               <Select value={agencyFilter} onValueChange={setAgencyFilter}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Agency" />
@@ -169,148 +170,150 @@ export function MultiSignatureInterface() {
               loadingComponent={<TableSkeleton rows={5} columns={7} />}
             >
               {(approvals) => (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>ID</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Agency</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Approval Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {(approvals ?? []).length === 0 ? (
+                <div className="overflow-auto">
+                  <Table>
+                    <TableHeader>
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-4 text-muted-foreground">
-                          No approval requests found matching your filters
-                        </TableCell>
+                        <TableHead>ID</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Agency</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Approval Status</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
-                    ) : (
-                      (approvals ?? []).map((approval) => (
-                        <TableRow key={approval.id}>
-                          <TableCell className="font-medium">{approval.id}</TableCell>
-                          <TableCell>{approval.description}</TableCell>
-                          <TableCell>{approval.date}</TableCell>
-                          <TableCell>{approval.agency}</TableCell>
-                          <TableCell>₦{Number(approval.amount).toLocaleString()}</TableCell>
-                          <TableCell>
-                            {approval.status === "pending" && (
-                              <div className="flex flex-col gap-1">
-                                <div className="flex items-center justify-between text-xs">
-                                  <span>Approval Progress</span>
-                                  <span>
-                                    {approval.approvals.filter((a: any) => a.status === "approved").length}/
-                                    {approval.approvals.length}
-                                  </span>
-                                </div>
-                                <Progress
-                                  value={
-                                    (approval.approvals.filter((a: any) => a.status === "approved").length /
-                                      approval.approvals.length) *
-                                    100
-                                  }
-                                  className="h-2"
-                                />
-                                <div className="flex items-center gap-2 mt-1">
-                                  <TooltipProvider>
-                                    {approval.approvals.map((a: any, i: number) => (
-                                      <Tooltip key={i}>
-                                        <TooltipTrigger asChild>
-                                          <div
-                                            className={`flex h-6 w-6 items-center justify-center rounded-full ${
-                                              a.status === "approved"
-                                                ? "bg-green-100 text-green-700"
-                                                : a.status === "rejected"
-                                                  ? "bg-red-100 text-red-700"
-                                                  : "bg-amber-100 text-amber-700"
-                                            }`}
-                                          >
-                                            {a.status === "approved" ? (
-                                              <CheckCircle2 className="h-4 w-4" />
-                                            ) : a.status === "rejected" ? (
-                                              <XCircle className="h-4 w-4" />
-                                            ) : (
-                                              <Clock className="h-4 w-4" />
-                                            )}
-                                          </div>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                          <p>
-                                            {a.role}: {a.status}
-                                          </p>
-                                          <p className="text-xs text-muted-foreground">{a.name}</p>
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    ))}
-                                  </TooltipProvider>
-                                </div>
-                              </div>
-                            )}
-                            {approval.status === "approved" && (
-                              <Badge
-                                variant="outline"
-                                className="bg-green-50 text-green-700 hover:bg-green-50 border-green-200"
-                              >
-                                Approved
-                              </Badge>
-                            )}
-                            {approval.status === "rejected" && (
-                              <Badge
-                                variant="outline"
-                                className="bg-red-50 text-red-700 hover:bg-red-50 border-red-200 flex items-center gap-1"
-                              >
-                                <AlertTriangle className="h-3 w-3" />
-                                Rejected
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {approval.status === "pending" && (
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="h-8 w-8 p-0"
-                                  onClick={() => handleApprove(approval.id, "AI Verification")}
-                                  disabled={isUpdating}
-                                >
-                                  <ThumbsUp className="h-4 w-4 text-green-600" />
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="h-8 w-8 p-0"
-                                  onClick={() => handleReject(approval.id, "AI Verification")}
-                                  disabled={isUpdating}
-                                >
-                                  <ThumbsDown className="h-4 w-4 text-red-600" />
-                                </Button>
-                                <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                                  <ChevronRight className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            )}
-                            {(approval.status === "approved" || approval.status === "rejected") && (
-                              <Button variant="outline" size="sm">
-                                View Details
-                              </Button>
-                            )}
+                    </TableHeader>
+                    <TableBody>
+                      {approvals.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={7} className="text-center py-4 text-muted-foreground">
+                            No approval requests found matching your filters
                           </TableCell>
                         </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
+                      ) : (
+                        approvals.map((approval) => (
+                          <TableRow key={approval.id}>
+                            <TableCell className="font-medium">{approval.id}</TableCell>
+                            <TableCell>{approval.description}</TableCell>
+                            <TableCell>{approval.date}</TableCell>
+                            <TableCell>{approval.agency}</TableCell>
+                            <TableCell>₦{Number(approval.amount).toLocaleString()}</TableCell>
+                            <TableCell>
+                              {approval.status === "pending" && (
+                                <div className="flex flex-col gap-1">
+                                  <div className="flex items-center justify-between text-xs">
+                                    <span>Approval Progress</span>
+                                    <span>
+                                      {approval.approvals.filter((a: any) => a.status === "approved").length}/
+                                      {approval.approvals.length}
+                                    </span>
+                                  </div>
+                                  <Progress
+                                    value={
+                                      (approval.approvals.filter((a: any) => a.status === "approved").length /
+                                        approval.approvals.length) *
+                                      100
+                                    }
+                                    className="h-2"
+                                  />
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <TooltipProvider>
+                                      {approval.approvals.map((a: any, i: number) => (
+                                        <Tooltip key={i}>
+                                          <TooltipTrigger asChild>
+                                            <div
+                                              className={`flex h-6 w-6 items-center justify-center rounded-full ${
+                                                a.status === "approved"
+                                                  ? "bg-green-100 text-green-700"
+                                                  : a.status === "rejected"
+                                                    ? "bg-red-100 text-red-700"
+                                                    : "bg-amber-100 text-amber-700"
+                                              }`}
+                                            >
+                                              {a.status === "approved" ? (
+                                                <CheckCircle2 className="h-4 w-4" />
+                                              ) : a.status === "rejected" ? (
+                                                <XCircle className="h-4 w-4" />
+                                              ) : (
+                                                <Clock className="h-4 w-4" />
+                                              )}
+                                            </div>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            <p>
+                                              {a.role}: {a.status}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">{a.name}</p>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      ))}
+                                    </TooltipProvider>
+                                  </div>
+                                </div>
+                              )}
+                              {approval.status === "approved" && (
+                                <Badge
+                                  variant="outline"
+                                  className="bg-green-50 text-green-700 hover:bg-green-50 border-green-200"
+                                >
+                                  Approved
+                                </Badge>
+                              )}
+                              {approval.status === "rejected" && (
+                                <Badge
+                                  variant="outline"
+                                  className="bg-red-50 text-red-700 hover:bg-red-50 border-red-200 flex items-center gap-1"
+                                >
+                                  <AlertTriangle className="h-3 w-3" />
+                                  Rejected
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {approval.status === "pending" && (
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => handleApprove(approval.id, "International Organization")}
+                                    disabled={isUpdating}
+                                  >
+                                    <ThumbsUp className="h-4 w-4 text-green-600" />
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => handleReject(approval.id, "International Organization")}
+                                    disabled={isUpdating}
+                                  >
+                                    <ThumbsDown className="h-4 w-4 text-red-600" />
+                                  </Button>
+                                  <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                                    <ChevronRight className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              )}
+                              {(approval.status === "approved" || approval.status === "rejected") && (
+                                <Button variant="outline" size="sm">
+                                  View Details
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
             </DataLoader>
           </Tabs>
         </CardContent>
       </Card>
 
-      <Card className="lg:col-span-2">
+      <Card className="lg:col-span-2 md:col-span-2 col-span-1">
         <CardHeader>
           <CardTitle>Approval Chain</CardTitle>
           <CardDescription>Required signatures for fund release</CardDescription>
@@ -331,11 +334,11 @@ export function MultiSignatureInterface() {
             </div>
             <div className="flex flex-col items-center gap-2 rounded-lg border p-4">
               <div className="rounded-full bg-amber-100 p-2">
-                <Shield className="h-5 w-5 text-amber-600" />
+                <Globe className="h-5 w-5 text-amber-600" />
               </div>
               <h4 className="text-sm font-medium">International Organization</h4>
               <p className="text-xs text-center text-muted-foreground">
-                Reviews for compliance with anti-corruption policies
+                Independent verification by international observers
               </p>
             </div>
           </div>

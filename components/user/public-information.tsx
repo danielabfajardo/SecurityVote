@@ -114,14 +114,14 @@ export function PublicInformation() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {(reports ?? []).length === 0 ? (
+                  {reports.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
                         No reports found matching your filters
                       </TableCell>
                     </TableRow>
                   ) : (
-                    (reports ?? []).map((report) => (
+                    reports.map((report) => (
                       <TableRow key={report.id}>
                         <TableCell className="font-medium">{report.id}</TableCell>
                         <TableCell>{report.title}</TableCell>
@@ -322,7 +322,7 @@ export function PublicInformation() {
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <p className="text-sm text-muted-foreground">
-                  Documentation of AI ethics, oversight, and governance for the SecurityVote system.
+                  Documentation of AI ethics, oversight, and governance for the SecureGov AI system.
                 </p>
                 <div className="flex items-center text-xs text-muted-foreground mt-2">
                   <Calendar className="mr-1 h-3 w-3" />

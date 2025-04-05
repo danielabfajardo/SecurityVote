@@ -7,11 +7,15 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { MobileNav } from "@/components/mobile-nav"
 import { UserNav } from "@/components/user-nav"
 import { ReportGenerator } from "@/components/report-generator"
+import { useAuthState } from "@/hooks/use-auth-state"
+import { ResponsiveContainer } from "@/components/layout/responsive-container"
 
 export function DashboardHeader() {
+  const { user } = useAuthState()
+
   return (
     <header className="sticky top-0 z-40 border-b bg-background">
-      <div className="container flex h-16 items-center justify-between py-4">
+      <ResponsiveContainer className="flex h-16 items-center justify-between py-4">
         <div className="flex items-center gap-2 md:gap-4">
           <Sheet>
             <SheetTrigger asChild>
@@ -26,8 +30,13 @@ export function DashboardHeader() {
           </Sheet>
           <div className="hidden md:flex">
             <div className="font-bold text-xl flex items-center gap-2">
-              <div>Security</div>
-              <span className="bg-primary text-primary-foreground p-1 rounded">Vote</span>
+              <div className="bg-primary text-primary-foreground p-1 rounded">Security</div>
+              <span>Vote</span>
+              {user?.role && (
+                <span className="text-sm font-normal bg-muted px-2 py-1 rounded ml-2 capitalize">
+                  {user.role} Portal
+                </span>
+              )}
             </div>
           </div>
           <div className="md:hidden font-bold text-lg">SecurityVote</div>
@@ -49,7 +58,7 @@ export function DashboardHeader() {
             <ReportGenerator />
           </div>
         </div>
-      </div>
+      </ResponsiveContainer>
     </header>
   )
 }

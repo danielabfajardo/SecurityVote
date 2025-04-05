@@ -7,8 +7,9 @@ import ClientLayout from "./ClientLayout"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "SecurityVote",
-  description: "Secure Government Platform for Transparency and Accountability"
+  title: "SecureGov AI",
+  description: "Secure Government AI Platform for Transparency and Accountability",
+    generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -18,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className} suppressHydrationWarning>
+      <body className={inter.className}>
         <ClientLayout>{children}</ClientLayout>
       </body>
     </html>

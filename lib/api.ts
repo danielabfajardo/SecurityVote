@@ -36,14 +36,14 @@ async function fetchData<T>(fetcher: () => Promise<T>, errorMessage = "Failed to
 // Update the getBudgetData function to include fallback data
 export async function getBudgetData() {
   return fetchData(async () => {
-    // try {
-    //   const { data, error } = await supabase.from("budget_transactions").select("*").order("date", { ascending: false })
+    try {
+      const { data, error } = await supabase.from("budget_transactions").select("*").order("date", { ascending: false })
 
-    //   if (error) throw error
-    //   return data as BudgetTransaction[]
-    // } catch (error: any) {
+      if (error) throw error
+      return data as BudgetTransaction[]
+    } catch (error: any) {
       // Fallback data if the table doesn't exist or there's an error
-      //console.warn("Using fallback data for budget transactions:", error.message)
+      console.warn("Using fallback data for budget transactions:", error.message)
       return [
         {
           id: "TR-7829",
@@ -96,7 +96,7 @@ export async function getBudgetData() {
           created_at: new Date().toISOString(),
         },
       ]
-   // }
+    }
   }, "Failed to fetch budget data")
 }
 
@@ -112,14 +112,14 @@ export async function getBudgetSummary() {
 // Modify the getBudgetAllocationByAgency function to include fallback data
 export async function getBudgetAllocationByAgency() {
   return fetchData(async () => {
-    // try {
-    //   const { data, error } = await supabase.rpc("get_budget_allocation_by_agency")
+    try {
+      const { data, error } = await supabase.rpc("get_budget_allocation_by_agency")
 
-    //   if (error) throw error
-    //   return data
-    // } catch (error: any) {
+      if (error) throw error
+      return data
+    } catch (error: any) {
       // Fallback data if the function doesn't exist
-     // console.warn("Using fallback data for budget allocation by agency:", error.message)
+      console.warn("Using fallback data for budget allocation by agency:", error.message)
       return [
         { name: "Border Patrol", value: 35 },
         { name: "Cyber Defense", value: 25 },
@@ -127,7 +127,7 @@ export async function getBudgetAllocationByAgency() {
         { name: "Emergency Response", value: 15 },
         { name: "Police Force", value: 5 },
       ]
-   // }
+    }
   }, "Failed to fetch budget allocation by agency")
 }
 
@@ -154,6 +154,8 @@ export async function getBudgetTrends() {
   }, "Failed to fetch budget trends")
 }
 
+// Fraud detection data
+// Update the getFraudAlerts function to include fallback data
 export async function getFraudAlerts() {
   return fetchData(async () => {
     try {
@@ -228,36 +230,36 @@ export async function getFraudAlerts() {
 // Modify the getFraudPatterns function to include fallback data
 export async function getFraudPatterns() {
   return fetchData(async () => {
-    // try {
-    //   const { data, error } = await supabase.rpc("get_fraud_patterns")
+    try {
+      const { data, error } = await supabase.rpc("get_fraud_patterns")
 
-    //   if (error) throw error
-    //   return data
-    // } catch (error: any) {
-    //   // Fallback data if the function doesn't exist
-    //   console.warn("Using fallback data for fraud patterns:", error.message)
+      if (error) throw error
+      return data
+    } catch (error: any) {
+      // Fallback data if the function doesn't exist
+      console.warn("Using fallback data for fraud patterns:", error.message)
       return [
         { name: "Duplicate Payments", count: 24 },
         { name: "Inflated Contracts", count: 18 },
         { name: "Ghost Projects", count: 12 },
         { name: "Political Connections", count: 9 },
         { name: "Unusual Amounts", count: 15 },
-       ]
-    // }
+      ]
+    }
   }, "Failed to fetch fraud patterns")
 }
 
 // Modify the getFraudTrends function to include fallback data
 export async function getFraudTrends() {
   return fetchData(async () => {
-    // try {
-    //   const { data, error } = await supabase.rpc("get_fraud_trends")
+    try {
+      const { data, error } = await supabase.rpc("get_fraud_trends")
 
-    //   if (error) throw error
-    //   return data
-    // } catch (error: any) {
+      if (error) throw error
+      return data
+    } catch (error: any) {
       // Fallback data if the function doesn't exist
-      //console.warn("Using fallback data for fraud trends:", error.message)
+      console.warn("Using fallback data for fraud trends:", error.message)
       return [
         { name: "Jan", fraudCases: 4, amount: 2.4 },
         { name: "Feb", fraudCases: 3, amount: 1.8 },
@@ -269,7 +271,7 @@ export async function getFraudTrends() {
         { name: "Aug", fraudCases: 9, amount: 6.3 },
         { name: "Sep", fraudCases: 4, amount: 2.7 },
       ]
-    //}
+    }
   }, "Failed to fetch fraud trends")
 }
 
@@ -281,7 +283,30 @@ export async function getApprovalRequests() {
       const { data, error } = await supabase.from("approval_requests").select("*").order("date", { ascending: false })
 
       if (error) throw error
-      return data as ApprovalRequest[]
+
+      // Transform the data to use the new roles
+      const updatedData = data.map((request) => {
+        // Convert the old 3-role system to the new 2-role system
+        const newApprovals = [
+          {
+            role: "Auditor",
+            status: request.approvals.find((a: any) => a.role === "Auditor")?.status || "pending",
+            name: request.approvals.find((a: any) => a.role === "Auditor")?.name || "John Adebayo",
+          },
+          {
+            role: "International Organization",
+            status: request.approvals.find((a: any) => a.role === "Anti-Corruption")?.status || "pending",
+            name: "International Observer",
+          },
+        ]
+
+        return {
+          ...request,
+          approvals: newApprovals,
+        }
+      })
+
+      return updatedData as ApprovalRequest[]
     } catch (error: any) {
       // Fallback data if the table doesn't exist or there's an error
       console.warn("Using fallback data for approval requests:", error.message)
@@ -295,7 +320,7 @@ export async function getApprovalRequests() {
           status: "pending",
           approvals: [
             { role: "Auditor", status: "approved", name: "John Adebayo" },
-            { role: "International Organization", status: "pending", name: "Sarah Okafor" },
+            { role: "International Organization", status: "pending", name: "International Observer" },
           ],
           created_at: new Date().toISOString(),
         },
@@ -308,7 +333,7 @@ export async function getApprovalRequests() {
           status: "pending",
           approvals: [
             { role: "Auditor", status: "approved", name: "John Adebayo" },
-            { role: "International Organization", status: "approved", name: "Sarah Okafor" },
+            { role: "International Organization", status: "pending", name: "International Observer" },
           ],
           created_at: new Date().toISOString(),
         },
@@ -321,7 +346,7 @@ export async function getApprovalRequests() {
           status: "rejected",
           approvals: [
             { role: "Auditor", status: "approved", name: "John Adebayo" },
-            { role: "International Organization", status: "approved", name: "Sarah Okafor" },
+            { role: "International Organization", status: "rejected", name: "International Observer" },
           ],
           rejection_reason: "Duplicate payment detected. Similar transaction processed on 2023-09-05.",
           created_at: new Date().toISOString(),
@@ -335,7 +360,7 @@ export async function getApprovalRequests() {
           status: "approved",
           approvals: [
             { role: "Auditor", status: "approved", name: "John Adebayo" },
-            { role: "International Organization", status: "approved", name: "Sarah Okafor" },
+            { role: "International Organization", status: "approved", name: "International Observer" },
           ],
           created_at: new Date().toISOString(),
         },
@@ -348,7 +373,7 @@ export async function getApprovalRequests() {
           status: "pending",
           approvals: [
             { role: "Auditor", status: "pending", name: "John Adebayo" },
-            { role: "International Organization", status: "pending", name: "Sarah Okafor" },
+            { role: "International Organization", status: "pending", name: "International Observer" },
           ],
           created_at: new Date().toISOString(),
         },
@@ -616,14 +641,14 @@ export async function getPublicReports() {
 // Modify the getRecentActivity function to include fallback data
 export async function getRecentActivity() {
   return fetchData(async () => {
-    // try {
-    //   const { data, error } = await supabase.rpc("get_recent_activity")
+    try {
+      const { data, error } = await supabase.rpc("get_recent_activity")
 
-    //   if (error) throw error
-    //   return data
-    // } catch (error: any) {
+      if (error) throw error
+      return data
+    } catch (error: any) {
       // Fallback data if the function doesn't exist
-      //console.warn("Using fallback data for recent activity:", error.message)
+      console.warn("Using fallback data for recent activity:", error.message)
       return [
         {
           title: "Budget Increase Approved",
@@ -658,7 +683,7 @@ export async function getRecentActivity() {
           iconColor: "text-purple-600",
         },
       ]
-    //}
+    }
   }, "Failed to fetch recent activity")
 }
 

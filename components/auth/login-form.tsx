@@ -136,7 +136,13 @@ export function LoginForm() {
         <div className="text-xs text-muted-foreground border-t pt-4 text-center">
           <p className="font-medium mb-1">Example Credentials for Testing:</p>
           <p>
-            <strong>Admin:</strong> admin@securegovai.org / admin123
+            <strong>Admin:</strong> admin@securityvote.org / admin123
+          </p>
+          <p>
+            <strong>Auditor:</strong> auditor@securityvote.org / auditor123
+          </p>
+          <p>
+            <strong>Int'l Organization:</strong> intl@securityvote.org / intl123
           </p>
           <p>
             <strong>User:</strong> user@example.com / user123
